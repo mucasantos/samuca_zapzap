@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -19,6 +20,8 @@ class _CadastroState extends State<Cadastro> {
   TextEditingController _controllerSenha = TextEditingController();
   String _mensagemErro = '';
   bool _isLogin = true;
+
+  Firestore db = Firestore.instance;
 
   _validarCampos(bool isLogin) {
     String nome = _controllerNome.text;
@@ -65,11 +68,15 @@ class _CadastroState extends State<Cadastro> {
         .createUserWithEmailAndPassword(
             email: usuario.email, password: usuario.senha)
         .then((firebaseUser) {
-      print(firebaseUser.user.uid);
+      db
+          .collection("usuarios")
+          .document(firebaseUser.user.uid)
+          .setData(usuario.toMap());
+
       setState(() {
-        AppSettings.usuarioAtual = firebaseUser.user.uid;
+        AppSettings.usuarioAtual = usuario.nome;
       });
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (context) => Home(),
@@ -89,11 +96,11 @@ class _CadastroState extends State<Cadastro> {
     auth
         .signInWithEmailAndPassword(email: email, password: senha)
         .then((firebaseUser) {
-      print(firebaseUser.user.uid);
+
       setState(() {
-        AppSettings.usuarioAtual = firebaseUser.user.uid;
+        AppSettings.usuarioAtual = firebaseUser.user.email;
       });
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (context) => Home(),
