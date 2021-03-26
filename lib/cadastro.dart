@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:samuca_zapzap/RouteGeneration.dart';
 import 'package:samuca_zapzap/home.dart';
 import 'package:samuca_zapzap/model/Usuario.dart';
 import 'package:samuca_zapzap/util/appsettings.dart';
@@ -22,6 +23,7 @@ class _CadastroState extends State<Cadastro> {
   bool _isLogin = true;
 
   Firestore db = Firestore.instance;
+  FirebaseAuth auth = FirebaseAuth.instance;
 
   _validarCampos(bool isLogin) {
     String nome = _controllerNome.text;
@@ -43,6 +45,7 @@ class _CadastroState extends State<Cadastro> {
           usuario.nome = nome;
           usuario.email = email;
           usuario.senha = senha;
+          usuario.urlImage = '';
 
           _cadastrarUsuario(usuario);
         } else {
@@ -63,7 +66,6 @@ class _CadastroState extends State<Cadastro> {
   }
 
   _cadastrarUsuario(Usuario usuario) {
-    FirebaseAuth auth = FirebaseAuth.instance;
     auth
         .createUserWithEmailAndPassword(
             email: usuario.email, password: usuario.senha)
@@ -73,15 +75,11 @@ class _CadastroState extends State<Cadastro> {
           .document(firebaseUser.user.uid)
           .setData(usuario.toMap());
 
-      setState(() {
-        AppSettings.usuarioAtual = usuario.nome;
-      });
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => Home(),
-        ),
-      );
+      AppSettings.usuarioAtual = usuario.nome;
+      AppSettings.userId = firebaseUser.user.uid;
+      AppSettings.myProfileImage = '';
+
+      Navigator.pushReplacementNamed(context, RouteGenerate.ROTA_HOME);
     }).catchError((error) {
       if (error.code == 'ERROR_EMAIL_ALREADY_IN_USE') {
         setState(() {
@@ -91,27 +89,24 @@ class _CadastroState extends State<Cadastro> {
     });
   }
 
-  _logarUsuario(String email, String senha) {
-    FirebaseAuth auth = FirebaseAuth.instance;
-    auth
+  _logarUsuario(String email, String senha) async {
+    await auth
         .signInWithEmailAndPassword(email: email, password: senha)
         .then((firebaseUser) {
-
       setState(() {
-        AppSettings.usuarioAtual = firebaseUser.user.email;
+        AppSettings.userId = firebaseUser.user.uid;
       });
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => Home(),
-        ),
-      );
+      Navigator.pushReplacementNamed(context, RouteGenerate.ROTA_HOME);
     }).catchError((error) {
       setState(() {
         _mensagemErro = error.toString();
       });
     });
+
+
   }
+
+
 
   @override
   Widget build(BuildContext context) {

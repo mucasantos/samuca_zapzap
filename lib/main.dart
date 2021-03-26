@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:samuca_zapzap/RouteGeneration.dart';
 import 'package:samuca_zapzap/cadastro.dart';
 
 void main() {
@@ -9,6 +10,8 @@ void main() {
       primaryColor: Color(0xffE07A5F),
       accentColor: Color(0xffF4F1DE),
     ),
+    initialRoute: "/",
+    onGenerateRoute: RouteGenerate.generateRoute,
     debugShowCheckedModeBanner: false,
   ));
 }

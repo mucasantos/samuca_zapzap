@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:samuca_zapzap/cadastro.dart';
@@ -13,11 +14,14 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   TabController _trabController;
+  Firestore db = Firestore.instance;
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _trabController = TabController(length: 2, vsync: this);
+    _recoverUserData();
   }
 
   List<ItemMenu> itensMenu = [
@@ -35,8 +39,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         ))
   ];
   _escolhaMenuItem(ItemMenu itemEscolhido) {
-    print(itemEscolhido.nome);
-
+    Navigator.pushNamed(context, '/configurations');
     if (itemEscolhido.nome == 'Sair') {
       _deslogarUsuario();
     } else {
@@ -47,8 +50,24 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   _deslogarUsuario() async {
     FirebaseAuth auth = FirebaseAuth.instance;
     await auth.signOut();
-    Navigator.pushReplacement(
-        context, MaterialPageRoute(builder: (context) => Cadastro()));
+    AppSettings.userId = '';
+    AppSettings.myProfileImage = '';
+    AppSettings.myEmail = '';
+    AppSettings.usuarioAtual = '';
+    Navigator.pushNamedAndRemoveUntil(context, '/', (_) => false);
+  }
+
+  _recoverUserData() async {
+    DocumentSnapshot snapshot =
+        await db.collection('usuarios').document(AppSettings.userId).get();
+
+    Map<String, dynamic> dados = snapshot.data;
+
+setState(() {
+  AppSettings.usuarioAtual = dados['nome'];
+  AppSettings.myEmail = dados['email'];
+  AppSettings.myProfileImage = dados['urlImage'] ?? '';
+});
   }
 
   @override

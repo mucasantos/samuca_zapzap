@@ -2,6 +2,13 @@ class Usuario {
   String _nome;
   String _email;
   String _senha;
+  String _urlImage;
+
+  String get urlImage => _urlImage;
+
+  set urlImage(String value) {
+    _urlImage = value;
+  }
 
   Usuario();
 
@@ -9,9 +16,16 @@ class Usuario {
     Map<String, dynamic> map = {
       "nome": this.nome,
       "email": this.email,
+      "urlImage": this.urlImage
     };
 
     return map;
+  }
+
+  Usuario.fromJson(Map<String, dynamic> json) {
+    nome = json['nome'];
+    email = json['email'];
+    urlImage = json['urlImage'];
   }
 
   String get senha => _senha;
